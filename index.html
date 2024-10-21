@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự án Bán hàng</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            position: relative;
+        }
+
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+        }
+
+        button {
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 12px 20px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .container {
+            padding: 20px;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+
+        .product-header {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .product-header h2 {
+            font-size: 2em;
+            color: #4CAF50;
+            display: inline-block;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px; /* Đặt chiều cao cố định */
+            object-fit: cover; /* Đảm bảo ảnh không bị méo */
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .product-name {
+            font-size: 1.5em;
+            margin: 10px;
+        }
+
+        .product-price {
+            font-size: 1.2em;
+            color: #4CAF50;
+            margin: 10px;
+        }
+
+        .add-to-cart {
+            background-color: #4CAF50;
+            color: white;
+            display: block;
+            margin: 10px auto;
+            border-radius: 5px;
+            border: 2px solid transparent;
+        }
+
+        .add-to-cart:hover {
+            background-color: #45a049;
+            border: 2px solid #4CAF50;
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #4CAF50;
+            color: white;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="file"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #notification {
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* Styles for the cart modal */
+        #cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .cart-modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+        }
+
+        .remove-item {
+            color: red;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .checkout {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .checkout:hover {
+            background-color: #45a049;
+        }
+
+        .add-product-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .add-product-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-shopping-cart"></i> Dự án Bán hàng</h1>
+        <button onclick="showCart()">Giỏ hàng (<span id="cart-count">0</span>)</button>
+        <input type="text" id="search" placeholder="Tìm sản phẩm..." oninput="filterProducts()">
+        <button onclick="showAddProductModal()">Thêm sản phẩm</button>
+        <button onclick="showRandomProduct()">Xem sản phẩm ngẫu nhiên</button>
+    </div>
+
+    <div class="container">
+        <div class="product-header">
+            <h2>Sản phẩm</h2>
+        </div>
+        <div class="products" id="products">
+            <div class="product-card">
+                <img src="https://cf.shopee.vn/file/e3b6ee6a6f84406c52a3228ed2bb822c" alt="Sản phẩm 1">
+                <div class="product-name">Sản phẩm 1</div>
+                <div class="product-price">100.000 VNĐ</div>
+                <button class="add-to-cart" onclick="addToCart('Sản phẩm 1', 100000)">Thêm vào giỏ</button>
+            </div>
+            <div class="product-card">
+                <img src="https://tamanh.net/wp-content/uploads/2023/05/quan-kaki-tui-hop.jpg" alt="Sản phẩm 2">
+                <div class="product-name">Sản phẩm 2</div>
+                <div class="product-price">200.000 VNĐ</div>
+                <button class="add-to-cart" onclick="addToCart('Sản phẩm 2', 200000)">Thêm vào giỏ</button>
+            </div>
+            <div class="product-card">
+                <img src="https://cf.shopee.vn/file/e3b6ee6a6f84406c52a3228ed2bb822c" alt="Sản phẩm 3">
+                <div class="product-name">Sản phẩm 3</div>
+                <div class="product-price">150.000 VNĐ</div>
+                <button class="add-to-cart" onclick="addToCart('Sản phẩm 3', 150000)">Thêm vào giỏ</button>
+            </div>
+            <div class="product-card">
+                <img src="https://tamanh.net/wp-content/uploads/2023/05/quan-kaki-tui-hop.jpg" alt="Sản phẩm 4">
+                <div class="product-name">Sản phẩm 4</div>
+                <div class="product-price">100.000 VNĐ</div>
+                <button class="add-to-cart" onclick="addToCart('Sản phẩm 4', 100000)">Thêm vào giỏ</button>
+            </div>
+            <div class="product-card">
+                <img src="https://cf.shopee.vn/file/e3b6ee6a6f84406c52a3228ed2bb822c" alt="Sản phẩm 5">
+                <div class="product-name">Sản phẩm 5</div>
+                <div class="product-price">80.000 VNĐ</div>
+                <button class="add-to-cart" onclick="addToCart('Sản phẩm 5', 80000)">Thêm vào giỏ</button>
+            </div>
+            <div class="product-card">
+                <img src="https://tamanh.net/wp-content/uploads/2023/05/quan-kaki-tui-hop.jpg" alt="Sản phẩm 6">
+                <div class="product-name">Sản phẩm 6</div>
+                <div class="product-price">250.000 VNĐ</div>
+                <button class="add-to-cart" onclick="addToCart('Sản phẩm 6', 250000)">Thêm vào giỏ</button>
+            </div>
+            <div class="product-card">
+                <img src="https://cf.shopee.vn/file/e3b6ee6a6f84406c52a3228ed2bb822c" alt="Sản phẩm 7">
+                <div class="product-name">Sản phẩm 7</div>
+                <div class="product-price">300.000 VNĐ</div>
+                <button class="add-to-cart" onclick="addToCart('Sản phẩm 7', 300000)">Thêm vào giỏ</button>
+            </div>
+            <div class="product-card">
+                <img src="https://tamanh.net/wp-content/uploads/2023/05/quan-kaki-tui-hop.jpg" alt="Sản phẩm 8">
+                <div class="product-name">Sản phẩm 8</div>
+                <div class="product-price">120.000 VNĐ</div>
+                <button class="add-to-cart" onclick="addToCart('Sản phẩm 8', 120000)">Thêm vào giỏ</button>
+            </div>
+            <div class="product-card">
+                <img src="https://cf.shopee.vn/file/e3b6ee6a6f84406c52a3228ed2bb822c" alt="Sản phẩm 9">
+                <div class="product-name">Sản phẩm 9</div>
+                <div class="product-price">90.000 VNĐ</div>
+                <button class="add-to-cart" onclick="addToCart('Sản phẩm 9', 90000)">Thêm vào giỏ</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cart-modal" class="modal">
+        <div class="cart-modal-content">
+            <h2>Giỏ hàng</h2>
+            <div id="cart-items"></div>
+            <button onclick="checkout()" class="checkout">Thanh toán</button>
+            <button onclick="closeCart()">Đóng</button>
+        </div>
+    </div>
+
+    <div id="add-product-modal" class="add-product-modal">
+        <div class="add-product-content">
+            <h2>Thêm sản phẩm</h2>
+            <input type="text" id="new-product-name" placeholder="Tên sản phẩm">
+            <input type="number" id="new-product-price" placeholder="Giá sản phẩm">
+            <input type="file" id="new-product-image" accept="image/*">
+            <button onclick="addNewProduct()">Thêm sản phẩm</button>
+            <button onclick="closeAddProductModal()">Đóng</button>
+        </div>
+    </div>
+
+    <div id="notification">Sản phẩm đã được thêm vào giỏ!</div>
+
+    <div class="footer">
+        <p>&copy; 2024 Bản quyền thuộc về cá nhân Đậu Xuân Phú-Website được tạo ra vì mục đích học tập, không vì mục đích thương mại.</p>
+    </div>
+
+    <script>
+        let cart = [];
+        let cartCount = 0;
+
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            cartCount++;
+            updateCartCount();
+            showNotification();
+        }
+
+        function updateCartCount() {
+            document.getElementById('cart-count').innerText = cartCount;
+        }
+
+        function showNotification() {
+            const notification = document.getElementById('notification');
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 2000);
+        }
+
+        function showCart() {
+            const cartModal = document.getElementById('cart-modal');
+            cartModal.style.display = 'flex';
+            displayCartItems();
+        }
+
+        function closeCart() {
+            const cartModal = document.getElementById('cart-modal');
+            cartModal.style.display = 'none';
+        }
+
+        function displayCartItems() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            cartItemsContainer.innerHTML = '';
+            cart.forEach((item, index) => {
+                cartItemsContainer.innerHTML += `
+                    <div>
+                        ${item.name} - ${item.price.toLocaleString('vi-VN')} VNĐ
+                        <span class="remove-item" onclick="removeFromCart(${index})">Xóa</span>
+                    </div>
+                `;
+            });
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            cartCount--;
+            updateCartCount();
+            displayCartItems();
+        }
+
+        function checkout() {
+            alert('Cảm ơn bạn đã mua sắm!');
+            cart = [];
+            cartCount = 0;
+            updateCartCount();
+            closeCart();
+        }
+
+        function showAddProductModal() {
+            document.getElementById('add-product-modal').style.display = 'flex';
+        }
+
+        function closeAddProductModal() {
+            document.getElementById('add-product-modal').style.display = 'none';
+        }
+
+        function addNewProduct() {
+            const name = document.getElementById('new-product-name').value;
+            const price = document.getElementById('new-product-price').value;
+            const imageFile = document.getElementById('new-product-image').files[0];
+
+            if (name && price && imageFile) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const productsContainer = document.getElementById('products');
+                    productsContainer.innerHTML += `
+                        <div class="product-card">
+                            <img src="${e.target.result}" alt="${name}">
+                            <div class="product-name">${name}</div>
+                            <div class="product-price">${parseInt(price).toLocaleString('vi-VN')} VNĐ</div>
+                            <button class="add-to-cart" onclick="addToCart('${name}', ${price})">Thêm vào giỏ</button>
+                        </div>
+                    `;
+                    closeAddProductModal();
+                    document.getElementById('new-product-name').value = '';
+                    document.getElementById('new-product-price').value = '';
+                    document.getElementById('new-product-image').value = ''; // Reset the image input
+                };
+                reader.readAsDataURL(imageFile); // Chuyển đổi file thành URL
+            } else {
+                alert('Vui lòng nhập đủ thông tin sản phẩm.');
+            }
+        }
+
+        function filterProducts() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach(card => {
+                const productName = card.querySelector('.product-name').innerText.toLowerCase();
+                card.style.display = productName.includes(searchInput) ? 'block' : 'none';
+            });
+        }
+
+        function showRandomProduct() {
+            const productCards = document.querySelectorAll('.product-card');
+            const randomIndex = Math.floor(Math.random() * productCards.length);
+            const randomProduct = productCards[randomIndex];
+            alert(`Sản phẩm ngẫu nhiên: ${randomProduct.querySelector('.product-name').innerText}`);
+        }
+    </script>
+</body>
+</html>
